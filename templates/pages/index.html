@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div style="direction: rtl;" class="wrapper">
+      <!-- Content Wrapper. Contains page content -->
+      <div   class="content-wrapper">
+        <!-- Content Header (Page header) -->
+    
+    
+        <!--الاحصائيات-->
+        <div class="content">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-lg-6">
+                <div class="card">
+                  <div class="card-header border-0">
+                    <div class="d-flex justify-content-between">
+                      <h3 class="card-title">Total Books</h3>                    
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="d-flex">
+                      <p class="d-flex flex-column">
+                        <span class="text-bold text-lg">{{ allbooks }}</span>
+                        <span>Total Books</span>
+                      </p>  
+                    </div>
+                    <!-- /.d-flex -->
+
+                    <div class="position-relative mb-4">
+                      <canvas id="visitors-chart" height="200"></canvas>
+                    </div>  
+                  </div>
+                </div>
+                <!-- /.card -->
+              </div>
+              <!-- /.col-md-6 -->
+              
+              {% for book in books %}
+
+                {% if book.price != None %}
+                  {% if book.status == 'sold' %}
+                    <p class="totalprice">{{ book.price }}</p>
+                  {% endif %}
+                {% endif %}
+
+                {% if book.total_rental != None %}
+                  {% if book.status == 'rented' %}
+                    <p class="totalprice">{{ book.total_rental }}</p>
+                  {% endif %}
+                {% endif %}
+
+              {% endfor %}
+
+              {% for book in books %}
+                {% if book.status == 'rented' %}
+                  {% if book.total_rental != None %}
+                    <p class="totalrental">{{ book.total_rental }}</p>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+              <p class="rentalincome"></p>
+              
+              {% for book in books %}
+                {% if book.status == 'sold' %}
+                  {% if book.price != None %}
+                    <p class="totalsold">{{ book.price }}</p>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+              <p class="soldincome"></p>
+
+              <div class="col-lg-6">
+                <div class="card">
+                  <div class="card-header border-0">
+                    <div class="d-flex justify-content-between">
+                      <h3 class="card-title">Profits</h3>   
+                    </div>
+                  </div>    
+                  <div class="card-body">
+                    <div class="d-flex">
+                      <p class="d-flex flex-column">
+                        <span id="totalsalarys" class="text-bold text-lg">$</span><br></p>
+                    </div>
+                    <!-- /.d-flex -->
+    
+                    <div class="position-relative mb-4">
+                      <canvas id="sales-chart" height="160"></canvas>
+                    </div>
+    
+                    <div class="d-flex flex-row justify-content-end">
+                      <span class="mr-2">
+                        <i class="fas fa-square text-primary"></i> Profits from Selling
+                        <p id="soldtotals"></p>     
+                      </span>
+                      <span>
+                        <i class="fas fa-square text-gray"></i> Profits from Renting
+                        <p id="rentedtotals"></p>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          
+              <!-- /.col-md-6 -->
+            </div>
+            <!-- /.row -->
+    
+            <!-- form add books -->
+            <div class="row m-1 mb-3">   
+              <a href="#bookform" class="btn btn-primary" data-toggle="collapse">Add Book</a>
+            </div>
+            
+            <div id="bookform" class="card card-primary collapse">
+              <div class="card-header">
+                <h3 class="card-title">Add Book</h3>
+              </div>
+              <!-- /.card-header -->
+              <!-- form start -->
+              <form method="POST" enctype="multipart/form-data"  > 
+                {% csrf_token %}
+                <div class="card-body"> 
+                  {{ form }}
+                  <small id='totalrente' class="form-text text-muted"></small>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer">
+                  <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+              </form>
+            </div>
+    
+                  <!-- /.card -->
+            </div>
+            <!-- end form add books -->
+    
+    
+            <!-- تصنيفات-->
+    
+            <div class="row justify-content-center mb-3">
+              <div class="col-4 ">
+                <ul class="nav">
+                  {% for cate in category|slice:5 %}
+                    <li class="nav-item cate{{ cate.id }}">
+                      <a id="" class="nav-link bg-primary" href="#">{{ cate.name }}</a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+            <!-- books --> 
+          <div class="row">
+            {% for book in books %}
+                <div id="" class="col-md-4 bookhide book{{ book.category.id }} book{{ book.status }}">
+                    <!-- Widget: user widget style 1 -->
+                  <div id="" class="card card-widget widget-user ">
+                    <!-- Add the bg color to the header using any of the bg-* classes -->
+                  <!-- قائمة منسدلة -->
+                  <div style="position: absolute;" class="btn-group">   
+                    <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item" href="{% url 'update' book.id %}">Edit</a>
+                  <a class="dropdown-item" href="{% url 'delete' book.id %}">Delete</a>
+                  <!-- Button trigger modal -->
+                    </div>
+                  </div>
+                  {% if book.auther_photo %}
+                  <div style="background: url({{ book.auther_photo.url }}); background-size: cover; color: white" class="widget-user-header">
+                  {% endif %}
+                    <h3 class="widget-user-username">{{book.title}}</h3>
+                    <h5 class="widget-user-desc">{{book.author}}</h5>
+                  </div>
+                  <div class="widget-user-image">
+                    {% if book.cover %}
+                      <img style="width:100px; height: 100px;" class="img-circle elevation-2" src="{{ book.cover.url }}" alt="User Avatar">
+                    {% endif %}
+                  </div>
+                  <div class="card-footer">
+                    <div class="row">
+                      <div class="col-sm-4 border-right">
+                        <div class="description-block">
+                          <span class="description-text">Pages</span>
+                          <h5 class="description-header">{{book.pages}}</h5>
+                        </div>
+                        <!-- /.description-block -->
+                      </div>
+                          <!-- /.col -->
+                      <div class="col-sm-4 border-right">
+                        <div class="description-block">
+                          {% if book.price %}
+                            <span class="description-text">Price</span>
+                            <h5 class="description-header">${{book.price}}</h5>
+                          {% elif book.rental_price %}
+                            <span class="description-text">Rental Price</span>
+                            <h5 class="description-header">${{book.rental_price}}</h5>
+                          {% endif %}
+
+                        </div>
+                        <!-- /.description-block -->
+                      </div>
+                          <!-- /.col -->
+                      <div class="col-sm-4">
+                        <div class="description-block">
+                          {% if book.status == 'available' %}
+                            <span class="description-text">Status</span>
+                            <h5 class="description-header text-success">{{book.status}}</h5>
+                          {% elif book.status == 'rented' %}
+                            <span class="description-text">Status</span>
+                            <h5 class="description-header text-warning">{{book.status}}</h5>
+                          {% else %}
+                            <span class="description-text">Status</span>
+                            <h5 class="description-header text-danger">{{book.status}}</h5>
+                          {% endif %}
+                        </div>
+                        <!-- /.description-block -->
+                      </div>
+                          <!-- /.col -->
+                    </div>
+                        <!-- /.row -->
+                  </div>
+                  </div>
+                    <!-- /.widget-user -->
+                </div>
+            {% endfor %}
+
+
+                <div class="row">
+                  <div class="col text-center">
+                    <!--اضف صورة هنا في حالة عدم وجود كتب-->   
+                  </div>
+                </div>
+            </div>    
+        </div>
+      </div>
+          <!-- /.container-fluid -->
+    </div>
+        <!-- /.content -->
+  </div>
+{% endblock %}
